@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <title>ESP32 控制面板</title>
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
+    button { font-size: 20px; padding: 10px 20px; margin: 10px; }
+    #status { margin-top: 20px; font-size: 18px; }
+  </style>
+</head>
+<body>
+  <h1>ESP32 控制面板</h1>
+  <button onclick="sendCommand('on')">开灯</button>
+  <button onclick="sendCommand('off')">关灯</button>
+
+  <div id="status">当前状态：未知</div>
+
+  <script>
+    async function sendCommand(action) {
+      const response = await fetch('/set_command', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: action })
+      });
+      const result = await response.json();
+      document.getElementById('status').innerText = "当前状态：" + result.command.action;
+    }
+
+    // 定时刷新状态
+    async function refreshStatus() {
+      const response = await fetch('/get_command');
+      const result = await response.json();
+      document.getElementById('status').innerText = "当前状态：" + result.action;
+    }
+
+    setInterval(refreshStatus, 2000); // 每2秒刷新
+  </script>
+</body>
+</html>
